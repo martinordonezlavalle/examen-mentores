@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mentores Diplomáticos | Sistema de Exámenes</title>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #eef2f7 0%, #d9e1ec 100%);
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .app-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Logo bar */
+        .logo-bar {
+            background: #0a0a0a;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border-bottom: 3px solid #c7a23b;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logo-img {
+            max-height: 70px;
+            width: auto;
+            object-fit: contain;
+        }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .logo-text .mentores {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #f5e7c8;
+            text-transform: uppercase;
+        }
+        .logo-text .preparacion {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #c7a23b;
+            letter-spacing: 1px;
+        }
+        .upload-logo-btn, .teacher-mode-btn {
+            background: #2c5a74;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            color: white;
+            cursor: pointer;
+        }
+        .teacher-mode-btn {
+            background: #c7a23b;
+            color: #1e2f3a;
+            font-weight: bold;
+        }
+        .share-btn {
+            background: #c7a23b;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            color: #1e2f3a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.2s;
+        }
+        .share-btn:hover {
+            background: #e0b85c;
+            transform: scale(1.02);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #0a2b3e;
+            gap: 0.2rem;
+            padding: 0 1rem;
+            transition: all 0.2s;
+        }
+        .tab-btn {
+            background: #1e4a6b;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            border-radius: 1rem 1rem 0 0;
+            margin-top: 0.5rem;
+        }
+        .tab-btn.active {
+            background: #f5f9ff;
+            color: #0a2b3e;
+        }
+        .tab-pane {
+            display: none;
+            padding: 1.8rem;
+            background: #ffffff;
+        }
+        .tab-pane.active-pane {
+            display: block;
+        }
+
+        /* Estilos generales */
+        .inst-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #c7a23b;
+            padding-bottom: 0.5rem;
+        }
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+        button {
+            background: #eef2ff;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #cddfe9;
+            font-size: 0.85rem;
+        }
+        button.primary {
+            background: #0a2b3e;
+            color: white;
+            border: none;
+        }
+        button.warning {
+            background: #c7a23b;
+            color: #1e2f3a;
+        }
+        button.danger {
+            background: #cf4444;
+            color: white;
+        }
+        button.success {
+            background: #2c7a5e;
+            color: white;
+        }
+        .badge {
+            display: inline-block;
+            background: #eef2ff;
+            padding: 0.2rem 0.7rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+        /* Tarjetas de preguntas */
+        .questions-list {
+            max-height: 65vh;
+            overflow-y: auto;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 1rem;
+        }
+        .question-card {
+            background: #fafcff;
+            border: 1px solid #e2edf2;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .question-num {
+            font-weight: 800;
+            background: #eef2ff;
+            padding: 0.2rem 0.7rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+        }
+        .question-preview {
+            font-weight: 500;
+            margin: 0.5rem 0;
+            color: #1f3b4a;
+        }
+        .options-preview {
+            font-size: 0.85rem;
+            color: #4a627a;
+            margin: 0.3rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .dev-preview {
+            font-size: 0.8rem;
+            background: #f1f6f9;
+            padding: 0.4rem;
+            border-radius: 0.8rem;
+            margin-top: 0.5rem;
+            color: #2c5a74;
+        }
+        .card-actions {
+            margin-top: 0.6rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            max-width: 750px;
+            width: 90%;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 0.8rem;
+            font-size: 0.9rem;
+        }
+        .option-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .option-row span {
+            font-weight: bold;
+            width: 30px;
+        }
+
+        /* Examen */
+        .registration-box {
+            background: #f8fafc;
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2edf2;
+            text-align: center;
+        }
+        .reg-form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            background: #f0f4f9;
+            padding: 0.8rem 1rem;
+            border-radius: 1rem;
+        }
+        .timer-exam {
+            font-family: monospace;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: #0a2b3e;
+            padding: 0.2rem 1rem;
+            border-radius: 2rem;
+            color: white;
+        }
+        .question-area {
+            background: #fefefe;
+            border-radius: 1.5rem;
+            padding: 1rem;
+        }
+        .options-exam {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin: 1.2rem 0;
+        }
+        .opt-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem;
+            background: #f9fafc;
+            border-radius: 1rem;
+            cursor: pointer;
+            border: 1px solid #e2edf2;
+        }
+        .dev-panel-exam {
+            background: #f0f6fa;
+            border-left: 5px solid #c7a23b;
+            padding: 0.8rem;
+            margin: 1rem 0;
+            border-radius: 1rem;
+        }
+        .nav-exam {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+        .results-area {
+            background: #f8fafc;
+            border-radius: 1.2rem;
+            padding: 1rem;
+        }
+        .review-question {
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 0;
+        }
+        .scores-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .scores-table th, .scores-table td {
+            border: 1px solid #dee2e6;
+            padding: 0.7rem;
+            text-align: left;
+        }
+        .scores-table th {
+            background: #eef2ff;
+        }
+        .message {
+            padding: 0.5rem;
+            border-radius: 1rem;
+            margin: 0.5rem 0;
+        }
+        .error {
+            background: #ffe0e0;
+            color: #b00020;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        footer {
+            background: #f4f7fb;
+            padding: 0.8rem;
+            text-align: center;
+            font-size: 0.7rem;
+            border-top: 1px solid #dce5ec;
+        }
+        @media (max-width: 680px) {
+            .tab-btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
+            .timer-exam { font-size: 1.2rem; }
+            .logo-text .mentores { font-size: 1.4rem; }
+        }
+        /* Password modal */
+        .password-modal {
+            max-width: 400px;
+        }
+        .password-input {
+            width: 100%;
+            padding: 0.7rem;
+            margin: 1rem 0;
+        }
+        /* Configuración de correos (solo profesor) */
+        .email-config {
+            background: #f0f6fa;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+        }
+        .email-config input {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Barra con logo y controles -->
+    <div class="logo-bar">
+        <div class="logo-container">
+            <img id="logoImage" class="logo-img" src="" alt="Logo" style="display:none;">
+            <div id="logoText" class="logo-text">
+                <div class="mentores">MENTORES</div>
+                <div class="preparacion">PREPARACIÓN DIPLOMÁTICA</div>
+            </div>
+            <button id="uploadLogoBtn" class="upload-logo-btn">📷 Subir logo</button>
+            <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button id="teacherModeBtn" class="teacher-mode-btn">🔐 Modo Profesor</button>
+            <button id="shareExamLinkBtn" class="share-btn">🔗 Compartir examen</button>
+        </div>
+    </div>
+
+    <!-- Tabs - solo examen visible para alumnos, profesor verá todos -->
+    <div class="tabs" id="tabsContainer">
+        <button class="tab-btn active" data-tab="exam">🎓 Tomar Examen</button>
+        <button class="tab-btn teacher-only" data-tab="editor" style="display: none;">📝 Editor de Examen</button>
+        <button class="tab-btn teacher-only" data-tab="scores" style="display: none;">🏆 Puntajes y Registros</button>
+    </div>
+
+    <!-- Panel Editor (solo profesor) -->
+    <div id="editorPane" class="tab-pane">
+        <div class="inst-header">
+            <h2>📚 Banco de preguntas personalizable</h2>
+            <small>Hasta 160 preguntas | Opciones A-E | Desarrollo/Explicación</small>
+        </div>
+        <div class="toolbar">
+            <button id="addQuestionBtn" class="primary">➕ Nueva pregunta</button>
+            <button id="saveExamBtn" class="success">💾 Guardar examen (local)</button>
+            <button id="loadExamBtn" class="warning">📂 Cargar último guardado</button>
+            <button id="exportJsonBtn" class="primary">📎 Exportar JSON</button>
+            <input type="file" id="importJsonInput" accept=".json" style="display:none">
+            <button id="importJsonBtn" class="primary">📂 Importar JSON</button>
+        </div>
+        <div class="questions-list" id="questionsList">
+            <div style="text-align:center; padding:2rem;">No hay preguntas. Haz clic en "Nueva pregunta" para comenzar.</div>
+        </div>
+        <div class="toolbar" style="margin-top: 1rem;">
+            <span class="badge" id="questionCountDisplay">0 preguntas registradas</span>
+        </div>
+
+        <!-- Configuración de correos -->
+        <div class="email-config">
+            <h3>📧 Configuración de notificaciones (EmailJS)</h3>
+            <p>Para enviar resultados automáticamente al alumno y al profesor, completa los datos de tu cuenta de EmailJS. <a href="https://www.emailjs.com/" target="_blank">Crea una cuenta gratis</a> y luego obtén tus credenciales.</p>
+            <div class="form-group">
+                <label>Correo del profesor (destinatario):</label>
+                <input type="email" id="teacherEmail" placeholder="tuemail@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Public Key (EmailJS):</label>
+                <input type="text" id="emailjsPublicKey" placeholder="ejemplo: AbC123...">
+            </div>
+            <div class="form-group">
+                <label>Service ID:</label>
+                <input type="text" id="emailjsServiceId" placeholder="service_xxx">
+            </div>
+            <div class="form-group">
+                <label>Template ID:</label>
+                <input type="text" id="emailjsTemplateId" placeholder="template_xxx">
+            </div>
+            <button id="saveEmailConfigBtn" class="success">💾 Guardar configuración</button>
+            <div id="emailConfigMsg"></div>
+        </div>
+    </div>
+
+    <!-- Panel Examen (visible siempre) -->
+    <div id="examPane" class="tab-pane active-pane">
+        <div id="examRegistrationArea">
+            <div class="registration-box">
+                <h3>📝 Registro para presentar el examen</h3>
+                <p>Ingresa tus datos para comenzar. Tus resultados quedarán guardados y recibirás un correo con tu puntaje.</p>
+                <div class="reg-form">
+                    <input type="text" id="studentName" placeholder="Nombre completo" autocomplete="name">
+                    <input type="email" id="studentEmail" placeholder="Correo electrónico" autocomplete="email">
+                    <button id="registerAndStartBtn" class="btn-primary" style="background:#0a2b3e; color:white; border-radius:2rem; padding:0.7rem 1.5rem;">✅ Registrar y comenzar examen</button>
+                </div>
+                <div id="regMessage"></div>
+            </div>
+        </div>
+        <div id="examActiveArea" style="display:none;">
+            <div class="exam-header">
+                <div><strong>⏳ Tiempo restante</strong></div>
+                <div class="timer-exam" id="examTimerDisplay">03:00:00</div>
+            </div>
+            <div class="question-area">
+                <div id="examQuestionCounter" style="font-weight:600; margin-bottom:0.5rem;">Pregunta 1 / 0</div>
+                <div id="examQuestionText" style="font-size:1.2rem; font-weight:600; margin-bottom:1rem;"></div>
+                <div id="examOptionsContainer" class="options-exam"></div>
+                <div id="examDevPanel" class="dev-panel-exam" style="display:none;">
+                    <strong>📖 Desarrollo / Explicación:</strong><br>
+                    <span id="examDevContent"></span>
+                </div>
+                <div class="nav-exam">
+                    <button id="examPrevBtn" class="primary">◀ Anterior</button>
+                    <button id="examShowDevBtn" class="warning">📚 Ver desarrollo</button>
+                    <button id="examNextBtn" class="primary">Siguiente ▶</button>
+                    <button id="examFinishBtn" class="danger">🏁 Finalizar examen</button>
+                </div>
+            </div>
+        </div>
+        <div id="examResultsArea" style="display:none;"></div>
+    </div>
+
+    <!-- Panel Puntajes (solo profesor) -->
+    <div id="scoresPane" class="tab-pane">
+        <div style="margin-bottom:1.5rem;">
+            <h2>📊 Resultados de alumnos registrados</h2>
+            <button id="clearScoresBtn" class="danger" style="margin-top:0.5rem;">🗑️ Borrar todos los registros</button>
+        </div>
+        <div id="scoresTableContainer">
+            <p>Cargando puntajes...</p>
+        </div>
+    </div>
+
+    <footer>Mentores Preparación Diplomática · Sistema de exámenes con registro de alumnos y puntajes.</footer>
+</div>
+
+<!-- Modal para agregar/editar pregunta (solo profesor) -->
+<div id="questionModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Agregar / Editar pregunta</h3>
+        <div class="form-group">
+            <label>Texto de la pregunta:</label>
+            <textarea id="qText" rows="2" placeholder="Escriba la pregunta..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Opciones (A, B, C, D, E):</label>
+            <div class="option-row"><span>A</span><input type="text" id="optA" placeholder="Opción A"></div>
+            <div class="option-row"><span>B</span><input type="text" id="optB" placeholder="Opción B"></div>
+            <div class="option-row"><span>C</span><input type="text" id="optC" placeholder="Opción C"></div>
+            <div class="option-row"><span>D</span><input type="text" id="optD" placeholder="Opción D"></div>
+            <div class="option-row"><span>E</span><input type="text" id="optE" placeholder="Opción E"></div>
+        </div>
+        <div class="form-group">
+            <label>Respuesta correcta (letra):</label>
+            <select id="correctSelect">
+                <option value="0">A</option>
+                <option value="1">B</option>
+                <option value="2">C</option>
+                <option value="3">D</option>
+                <option value="4">E</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Desarrollo / Explicación:</label>
+            <textarea id="devText" rows="3" placeholder="Explicación detallada de la respuesta..."></textarea>
+        </div>
+        <div style="display:flex; gap:0.8rem; justify-content:flex-end; margin-top:1rem;">
+            <button id="modalCancelBtn" class="danger">Cancelar</button>
+            <button id="modalSaveBtn" class="success">Guardar pregunta</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para contraseña de profesor -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content password-modal">
+        <h3>🔐 Acceso modo profesor</h3>
+        <p>Ingresa la contraseña para acceder a las herramientas de edición y puntajes.</p>
+        <input type="password" id="teacherPassword" class="password-input" placeholder="Contraseña">
+        <div style="display:flex; gap:1rem; justify-content:flex-end; margin-top:1rem;">
+            <button id="cancelPasswordBtn" class="danger">Cancelar</button>
+            <button id="confirmPasswordBtn" class="success">Entrar</button>
+        </div>
+        <div id="passwordError" style="color:red; margin-top:0.5rem; font-size:0.8rem;"></div>
+    </div>
+</div>
+
+<script>
+    // ======================== CONFIGURACIÓN DE SEGURIDAD ========================
+    const TEACHER_PASSWORD = "mentores2026"; // Cambia esta contraseña si lo deseas
+    let teacherMode = false;
+
+    function setTeacherMode(active) {
+        teacherMode = active;
+        const teacherTabs = document.querySelectorAll('.teacher-only');
+        teacherTabs.forEach(tab => {
+            tab.style.display = active ? 'inline-block' : 'none';
+        });
+        if (!active) {
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab && activeTab.classList.contains('teacher-only')) {
+                setActiveTab('exam');
+            }
+        }
+        localStorage.setItem('teacher_mode', active ? 'true' : 'false');
+    }
+
+    function checkTeacherMode() {
+        const stored = localStorage.getItem('teacher_mode');
+        if (stored === 'true') {
+            setTeacherMode(true);
+        } else {
+            setTeacherMode(false);
+        }
+    }
+
+    function showPasswordModal() {
+        const modal = document.getElementById('passwordModal');
+        const passwordInput = document.getElementById('teacherPassword');
+        passwordInput.value = '';
+        document.getElementById('passwordError').innerText = '';
+        modal.style.display = 'flex';
+    }
+
+    function closePasswordModal() {
+        document.getElementById('passwordModal').style.display = 'none';
+    }
+
+    function verifyPassword() {
+        const input = document.getElementById('teacherPassword').value;
+        if (input === TEACHER_PASSWORD) {
+            setTeacherMode(true);
+            closePasswordModal();
+            alert("✅ Modo profesor activado. Ahora puedes editar preguntas y ver puntajes.");
+        } else {
+            document.getElementById('passwordError').innerText = '❌ Contraseña incorrecta.';
+        }
+    }
+
+    // ======================== CONFIGURACIÓN DE CORREOS (EmailJS) ========================
+    // Cargar configuración guardada
+    let emailConfig = {
+        teacherEmail: "",
+        publicKey: "",
+        serviceId: "",
+        templateId: ""
+    };
+
+    function loadEmailConfig() {
+        const saved = localStorage.getItem('mentores_email_config');
+        if (saved) {
+            try {
+                emailConfig = JSON.parse(saved);
+                document.getElementById('teacherEmail').value = emailConfig.teacherEmail || "";
+                document.getElementById('emailjsPublicKey').value = emailConfig.publicKey || "";
+                document.getElementById('emailjsServiceId').value = emailConfig.serviceId || "";
+                document.getElementById('emailjsTemplateId').value = emailConfig.templateId || "";
+                if (emailConfig.publicKey) {
+                    emailjs.init(emailConfig.publicKey);
+                }
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function saveEmailConfig() {
+        emailConfig = {
+            teacherEmail: document.getElementById('teacherEmail').value.trim(),
+            publicKey: document.getElementById('emailjsPublicKey').value.trim(),
+            serviceId: document.getElementById('emailjsServiceId').value.trim(),
+            templateId: document.getElementById('emailjsTemplateId').value.trim()
+        };
+        localStorage.setItem('mentores_email_config', JSON.stringify(emailConfig));
+        if (emailConfig.publicKey) {
+            emailjs.init(emailConfig.publicKey);
+        }
+        const msgDiv = document.getElementById('emailConfigMsg');
+        msgDiv.innerHTML = '<div class="message success">✅ Configuración guardada correctamente.</div>';
+        setTimeout(() => { msgDiv.innerHTML = ''; }, 3000);
+    }
+
+    // Enviar correo con resultados
+    async function sendResultsEmail(studentName, studentEmail, score, total, percent) {
+        if (!emailConfig.publicKey || !emailConfig.serviceId || !emailConfig.templateId) {
+            console.warn("EmailJS no configurado");
+            return false;
+        }
+        const templateParams = {
+            to_name: studentName,
+            to_email: studentEmail,
+            teacher_email: emailConfig.teacherEmail || "",
+            score: `${score}/${total}`,
+            percent: `${percent}%`,
+            date: new Date().toLocaleString(),
+            student_name: studentName,
+            student_email: studentEmail
+        };
+        try {
+            // Enviar al alumno
+            await emailjs.send(emailConfig.serviceId, emailConfig.templateId, templateParams);
+            // Si hay correo de profesor, enviar también una copia (podría ser el mismo template con otro destinatario)
+            if (emailConfig.teacherEmail) {
+                const teacherParams = { ...templateParams, to_email: emailConfig.teacherEmail, to_name: "Profesor" };
+                await emailjs.send(emailConfig.serviceId, emailConfig.templateId, teacherParams);
+            }
+            return true;
+        } catch (err) {
+            console.error("Error enviando correo:", err);
+            return false;
+        }
+    }
+
+    // ======================== GESTIÓN DE PREGUNTAS ========================
+    let questions = [];
+    let editIndex = -1;
+
+    const questionsListDiv = document.getElementById('questionsList');
+    const questionCountSpan = document.getElementById('questionCountDisplay');
+    const addBtn = document.getElementById('addQuestionBtn');
+    const saveExamBtn = document.getElementById('saveExamBtn');
+    const loadExamBtn = document.getElementById('loadExamBtn');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+    const importJsonBtn = document.getElementById('importJsonBtn');
+    const importFileInput = document.getElementById('importJsonInput');
+    const modal = document.getElementById('questionModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const qTextArea = document.getElementById('qText');
+    const optA = document.getElementById('optA');
+    const optB = document.getElementById('optB');
+    const optC = document.getElementById('optC');
+    const optD = document.getElementById('optD');
+    const optE = document.getElementById('optE');
+    const correctSelect = document.getElementById('correctSelect');
+    const devTextarea = document.getElementById('devText');
+    const modalCancel = document.getElementById('modalCancelBtn');
+    const modalSave = document.getElementById('modalSaveBtn');
+
+    function renderQuestionsList() {
+        if (!questionsListDiv) return;
+        if (questions.length === 0) {
+            questionsListDiv.innerHTML = '<div style="text-align:center; padding:2rem;">📭 No hay preguntas. Haz clic en "Nueva pregunta" para comenzar.</div>';
+            questionCountSpan.innerText = `0 preguntas registradas (máx 160)`;
+            return;
+        }
+        let html = '';
+        questions.forEach((q, idx) => {
+            const optsPreview = q.options.map((opt, i) => `${String.fromCharCode(65+i)}. ${opt.substring(0, 50)}${opt.length>50?'...':''}`).join(' | ');
+            const correctLetter = String.fromCharCode(65+q.correct);
+            html += `
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-num">Pregunta ${idx+1}</span>
+                        <span class="badge">Correcta: ${correctLetter}</span>
+                    </div>
+                    <div class="question-preview"><strong>${q.text.substring(0, 120)}${q.text.length>120?'...':''}</strong></div>
+                    <div class="options-preview">${optsPreview}</div>
+                    <div class="dev-preview">📘 Desarrollo: ${q.development.substring(0, 80)}${q.development.length>80?'...':''}</div>
+                    <div class="card-actions">
+                        <button class="small edit-question" data-index="${idx}">✏️ Editar</button>
+                        <button class="small danger delete-question" data-index="${idx}">🗑 Eliminar</button>
+                    </div>
+                </div>
+            `;
+        });
+        questionsListDiv.innerHTML = html;
+        questionCountSpan.innerText = `${questions.length} preguntas registradas (máx 160)`;
+        document.querySelectorAll('.edit-question').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!teacherMode) return;
+                const idx = parseInt(btn.getAttribute('data-index'));
+                openEditModal(idx);
+            });
+        });
+        document.querySelectorAll('.delete-question').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!teacherMode) return;
+                const idx = parseInt(btn.getAttribute('data-index'));
+                if (confirm('¿Eliminar esta pregunta permanentemente?')) {
+                    questions.splice(idx, 1);
+                    renderQuestionsList();
+                    saveToLocalStorage();
+                }
+            });
+        });
+    }
+
+    function openEditModal(index = -1) {
+        if (!teacherMode) return;
+        editIndex = index;
+        if (index === -1) {
+            modalTitle.innerText = "➕ Nueva pregunta";
+            qTextArea.value = '';
+            optA.value = ''; optB.value = ''; optC.value = ''; optD.value = ''; optE.value = '';
+            correctSelect.value = "0";
+            devTextarea.value = '';
+        } else {
+            modalTitle.innerText = "✏️ Editar pregunta";
+            const q = questions[index];
+            qTextArea.value = q.text;
+            optA.value = q.options[0] || '';
+            optB.value = q.options[1] || '';
+            optC.value = q.options[2] || '';
+            optD.value = q.options[3] || '';
+            optE.value = q.options[4] || '';
+            correctSelect.value = q.correct.toString();
+            devTextarea.value = q.development;
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        editIndex = -1;
+    }
+
+    function saveCurrentQuestion() {
+        if (!teacherMode) return;
+        const text = qTextArea.value.trim();
+        if (!text) { alert("El texto de la pregunta es obligatorio"); return; }
+        const opts = [optA.value.trim(), optB.value.trim(), optC.value.trim(), optD.value.trim(), optE.value.trim()];
+        if (opts.some(opt => opt === "")) { alert("Todas las opciones (A-E) deben estar completas"); return; }
+        const correct = parseInt(correctSelect.value);
+        const development = devTextarea.value.trim() || "Sin desarrollo específico.";
+        
+        const newQuestion = {
+            text: text,
+            options: opts,
+            correct: correct,
+            development: development
+        };
+        
+        if (editIndex === -1) {
+            if (questions.length >= 160) {
+                alert("Límite máximo de 160 preguntas alcanzado.");
+                return;
+            }
+            questions.push(newQuestion);
+        } else {
+            questions[editIndex] = newQuestion;
+        }
+        renderQuestionsList();
+        saveToLocalStorage();
+        closeModal();
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('mentores_diplomatic_exam', JSON.stringify(questions));
+    }
+
+    function loadFromLocalStorage() {
+        const stored = localStorage.getItem('mentores_diplomatic_exam');
+        if (stored) {
+            try {
+                questions = JSON.parse(stored);
+                if (!Array.isArray(questions)) questions = [];
+                renderQuestionsList();
+            } catch(e) { console.warn(e); questions = []; renderQuestionsList(); }
+        } else {
+            questions = [];
+            renderQuestionsList();
+        }
+    }
+
+    function exportToJSON() {
+        if (!teacherMode) return;
+        if (questions.length === 0) { alert("No hay preguntas para exportar."); return; }
+        const dataStr = JSON.stringify(questions, null, 2);
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `examen_mentores_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function importFromJSON(file) {
+        if (!teacherMode) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const imported = JSON.parse(evt.target.result);
+                if (Array.isArray(imported) && imported.length <= 160 && imported.every(q => q.text && q.options && q.options.length === 5 && typeof q.correct === 'number')) {
+                    questions = imported;
+                    renderQuestionsList();
+                    saveToLocalStorage();
+                    alert(`Importación exitosa: ${questions.length} preguntas cargadas.`);
+                } else { alert("Formato inválido. Cada pregunta debe tener text, options[5], correct (0-4), development."); }
+            } catch(e) { alert("Error al parsear JSON"); }
+        };
+        reader.readAsText(file);
+    }
+
+    // ======================== SISTEMA DE EXAMEN Y REGISTRO ========================
+    let currentStudent = { name: "", email: "" };
+    let examActive = false;
+    let examTimerInterval = null;
+    let timeRemaining = 10800;
+    let userAnswers = [];
+    let currentExamIndex = 0;
+    let examQuestions = [];
+
+    function getAttempts() {
+        const stored = localStorage.getItem('mentores_exam_attempts');
+        return stored ? JSON.parse(stored) : [];
+    }
+    function saveAttempt(attempt) {
+        const attempts = getAttempts();
+        attempts.push(attempt);
+        localStorage.setItem('mentores_exam_attempts', JSON.stringify(attempts));
+    }
+    function renderScoresTable() {
+        if (!teacherMode) return;
+        const attempts = getAttempts();
+        const container = document.getElementById('scoresTableContainer');
+        if (!container) return;
+        if (attempts.length === 0) {
+            container.innerHTML = '<p>No hay registros de exámenes aún. Los alumnos deben registrarse y presentar el examen.</p>';
+            return;
+        }
+        let html = `<table class="scores-table"><thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Puntaje</th><th>%</th></thead><tbody>`;
+        attempts.sort((a,b)=>new Date(b.date) - new Date(a.date));
+        attempts.forEach(att => {
+            html += `<tr><td>${new Date(att.date).toLocaleString()}</td><td>${escapeHtml(att.name)}</td><td>${escapeHtml(att.email)}</td><td>${att.score}/${att.total}</td><td>${Math.round((att.score/att.total)*100)}%</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function registerAndStart() {
+        const name = document.getElementById('studentName').value.trim();
+        const email = document.getElementById('studentEmail').value.trim();
+        const msgDiv = document.getElementById('regMessage');
+        if(!name || !email){
+            msgDiv.innerHTML = '<div class="message error">❌ Nombre y correo son obligatorios.</div>';
+            return;
+        }
+        if(!email.includes('@')){
+            msgDiv.innerHTML = '<div class="message error">❌ Correo inválido.</div>';
+            return;
+        }
+        if(questions.length === 0){
+            msgDiv.innerHTML = '<div class="message error">📭 No hay preguntas disponibles. El administrador debe cargar preguntas en el Editor.</div>';
+            return;
+        }
+        currentStudent = { name, email };
+        startExamWithQuestions(questions);
+        msgDiv.innerHTML = '';
+    }
+
+    function startExamWithQuestions(qList) {
+        if (!qList || qList.length === 0) return;
+        if(examTimerInterval) clearInterval(examTimerInterval);
+        examActive = true;
+        examQuestions = [...qList];
+        userAnswers = new Array(examQuestions.length).fill(null);
+        currentExamIndex = 0;
+        timeRemaining = 10800;
+        updateTimerDisplayExam();
+        document.getElementById('examRegistrationArea').style.display = 'none';
+        document.getElementById('examActiveArea').style.display = 'block';
+        document.getElementById('examResultsArea').style.display = 'none';
+        loadExamQuestion();
+        startExamTimer();
+    }
+
+    function loadExamQuestion() {
+        if (!examActive || examQuestions.length===0) return;
+        const q = examQuestions[currentExamIndex];
+        document.getElementById('examQuestionCounter').innerText = `Pregunta ${currentExamIndex+1} / ${examQuestions.length}`;
+        document.getElementById('examQuestionText').innerText = `${currentExamIndex+1}. ${q.text}`;
+        let optsHtml = '';
+        const letters = ['A','B','C','D','E'];
+        q.options.forEach((opt,idx)=>{
+            const checked = (userAnswers[currentExamIndex] === idx) ? 'checked' : '';
+            optsHtml += `<div class="opt-item" data-opt-val="${idx}"><input type="radio" name="examOption" value="${idx}" id="opt_exam_${idx}" ${checked}><label for="opt_exam_${idx}" style="flex:1; cursor:pointer;"><strong>${letters[idx]}</strong>. ${opt}</label></div>`;
+        });
+        document.getElementById('examOptionsContainer').innerHTML = optsHtml;
+        document.getElementById('examDevPanel').style.display = 'none';
+        document.querySelectorAll('input[name="examOption"]').forEach(radio => {
+            radio.addEventListener('change', (e) => { if(examActive) userAnswers[currentExamIndex] = parseInt(e.target.value); });
+        });
+        document.querySelectorAll('.opt-item').forEach(div => {
+            div.addEventListener('click', (e) => {
+                if(e.target.tagName !== 'INPUT'){
+                    const radio = div.querySelector('input[type="radio"]');
+                    if(radio && !radio.checked && examActive){ radio.checked=true; const ev=new Event('change',{bubbles:true}); radio.dispatchEvent(ev); }
+                }
+            });
+        });
+    }
+
+    function showDevelopment() {
+        if(!examActive) return;
+        const q = examQuestions[currentExamIndex];
+        document.getElementById('examDevContent').innerText = q.development;
+        document.getElementById('examDevPanel').style.display = 'block';
+    }
+    function prevQuestion() { if(examActive && currentExamIndex>0){ currentExamIndex--; loadExamQuestion(); } else if(examActive) alert("Primera pregunta"); }
+    function nextQuestion() { if(examActive && currentExamIndex<examQuestions.length-1){ currentExamIndex++; loadExamQuestion(); } else if(examActive) alert("Última pregunta"); }
+    function finishExam() {
+        if(!examActive) return;
+        if(confirm("¿Finalizar el examen? Se guardará tu puntaje.")){
+            finalizeExamAndSave();
+        }
+    }
+    async function finalizeExamAndSave() {
+        if(!examActive) return;
+        examActive = false;
+        if(examTimerInterval) clearInterval(examTimerInterval);
+        let correctCount = 0;
+        examQuestions.forEach((q,idx)=>{
+            if(userAnswers[idx] !== null && userAnswers[idx] === q.correct) correctCount++;
+        });
+        const total = examQuestions.length;
+        const percent = Math.round((correctCount/total)*100);
+        const attempt = {
+            name: currentStudent.name,
+            email: currentStudent.email,
+            score: correctCount,
+            total: total,
+            percent: percent,
+            date: new Date().toISOString()
+        };
+        saveAttempt(attempt);
+        
+        // Enviar correo (si está configurado)
+        const emailSent = await sendResultsEmail(currentStudent.name, currentStudent.email, correctCount, total, percent);
+        
+        document.getElementById('examActiveArea').style.display = 'none';
+        let resultsHtml = `<div class="results-area"><div style="text-align:center; background:#eef2ff; padding:1rem; border-radius:1rem; margin-bottom:1.5rem;"><h2>📊 Resultado Final</h2><div style="font-size:2rem; font-weight:800;">${correctCount} / ${total} (${percent}%)</div><p>${percent>=70 ? "🎉 Excelente preparación diplomática." : percent>=50 ? "📘 Revisa los desarrollos para mejorar." : "📚 Esfuerzo, repasa cada desarrollo."}</p>${emailSent ? '<p class="success">📧 Se ha enviado un correo con tus resultados.</p>' : '<p class="error">⚠️ No se pudo enviar el correo. Contacta al administrador.</p>'}<button id="restartExamBtn" class="primary" style="margin-top:0.8rem;">🔄 Nuevo examen</button></div><h3>📋 Revisión detallada</h3>`;
+        examQuestions.forEach((q,idx)=>{
+            const userAns=userAnswers[idx]; const isCorrect=(userAns!==null && userAns===q.correct);
+            const correctLetter=String.fromCharCode(65+q.correct); const userLetter=userAns!==null?String.fromCharCode(65+userAns):"—";
+            resultsHtml+=`<div class="review-question"><strong>${idx+1}. ${q.text}</strong> ${isCorrect?"✅":"❌"}<br>Tu respuesta: <strong>${userLetter}</strong> (${userAns!==null?q.options[userAns]:"No respondida"})<br>Correcta: <strong>${correctLetter}. ${q.options[q.correct]}</strong><div class="dev-preview" style="margin-top:0.5rem;">📖 Desarrollo: ${q.development}</div></div>`;
+        });
+        resultsHtml+=`</div>`;
+        document.getElementById('examResultsArea').innerHTML = resultsHtml;
+        document.getElementById('examResultsArea').style.display = 'block';
+        document.getElementById('restartExamBtn').addEventListener('click', ()=>{
+            document.getElementById('examRegistrationArea').style.display = 'block';
+            document.getElementById('examActiveArea').style.display = 'none';
+            document.getElementById('examResultsArea').style.display = 'none';
+            document.getElementById('studentName').value = currentStudent.name;
+            document.getElementById('studentEmail').value = currentStudent.email;
+            currentStudent = { name: "", email: "" };
+            examActive=false;
+        });
+        if (teacherMode) renderScoresTable();
+    }
+    function startExamTimer() {
+        if(examTimerInterval) clearInterval(examTimerInterval);
+        examTimerInterval = setInterval(()=>{
+            if(examActive && timeRemaining>0){
+                timeRemaining--;
+                updateTimerDisplayExam();
+                if(timeRemaining===0){
+                    clearInterval(examTimerInterval);
+                    alert("Tiempo agotado. Examen finalizado.");
+                    finalizeExamAndSave();
+                }
+            } else if(!examActive && examTimerInterval) clearInterval(examTimerInterval);
+        },1000);
+    }
+    function updateTimerDisplayExam() {
+        const hrs = Math.floor(timeRemaining/3600);
+        const mins = Math.floor((timeRemaining%3600)/60);
+        const secs = timeRemaining%60;
+        const display = document.getElementById('examTimerDisplay');
+        if(display) display.innerText = `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }
+
+    function shareLink() {
+        navigator.clipboard.writeText(window.location.href).then(()=>{
+            alert("✅ Enlace copiado al portapapeles. Compártelo con tus alumnos.");
+        }).catch(()=>{
+            alert("No se pudo copiar, pero puedes compartir la URL de esta página.");
+        });
+    }
+
+    // Navegación tabs
+    function setActiveTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(pane=>pane.classList.remove('active-pane'));
+        document.getElementById(`${tabId}Pane`).classList.add('active-pane');
+        document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+        if(tabId === 'scores' && teacherMode) renderScoresTable();
+        if(tabId === 'exam') {
+            document.getElementById('examRegistrationArea').style.display = 'block';
+            document.getElementById('examActiveArea').style.display = 'none';
+            document.getElementById('examResultsArea').style.display = 'none';
+            if(examTimerInterval) clearInterval(examTimerInterval);
+            examActive = false;
+        }
+    }
+
+    // Logo personalizado
+    function setupLogo() {
+        const uploadBtn = document.getElementById('uploadLogoBtn');
+        const logoFileInput = document.getElementById('logoFileInput');
+        const logoImg = document.getElementById('logoImage');
+        const logoTxt = document.getElementById('logoText');
+        uploadBtn.addEventListener('click', () => logoFileInput.click());
+        logoFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    logoImg.src = ev.target.result;
+                    logoImg.style.display = 'block';
+                    logoTxt.style.display = 'none';
+                    localStorage.setItem('mentores_logo', ev.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        const savedLogo = localStorage.getItem('mentores_logo');
+        if (savedLogo) {
+            logoImg.src = savedLogo;
+            logoImg.style.display = 'block';
+            logoTxt.style.display = 'none';
+        } else {
+            logoImg.style.display = 'none';
+            logoTxt.style.display = 'flex';
+        }
+    }
+
+    // Eventos
+    addBtn.addEventListener('click',()=>{if(teacherMode) openEditModal(-1);});
+    saveExamBtn.addEventListener('click',()=>{if(teacherMode){saveToLocalStorage(); alert("Examen guardado en el navegador.");}});
+    loadExamBtn.addEventListener('click',()=>{if(teacherMode){loadFromLocalStorage(); alert("Preguntas cargadas desde almacenamiento local.");}});
+    exportJsonBtn.addEventListener('click',()=>{if(teacherMode) exportToJSON();});
+    importJsonBtn.addEventListener('click',()=>{if(teacherMode) importFileInput.click();});
+    importFileInput.addEventListener('change',(e)=>{if(teacherMode && e.target.files[0]) importFromJSON(e.target.files[0]); e.target.value='';});
+    modalCancel.addEventListener('click',closeModal);
+    modalSave.addEventListener('click',()=>{if(teacherMode) saveCurrentQuestion();});
+    document.getElementById('registerAndStartBtn').addEventListener('click',registerAndStart);
+    document.getElementById('examPrevBtn').addEventListener('click',prevQuestion);
+    document.getElementById('examNextBtn').addEventListener('click',nextQuestion);
+    document.getElementById('examShowDevBtn').addEventListener('click',showDevelopment);
+    document.getElementById('examFinishBtn').addEventListener('click',finishExam);
+    document.getElementById('shareExamLinkBtn').addEventListener('click',shareLink);
+    document.getElementById('clearScoresBtn').addEventListener('click',()=>{
+        if(!teacherMode) return;
+        if(confirm("⚠️ ¿Eliminar TODOS los registros de puntajes? Esta acción no se puede deshacer.")){
+            localStorage.removeItem('mentores_exam_attempts');
+            renderScoresTable();
+        }
+    });
+    document.getElementById('teacherModeBtn').addEventListener('click', showPasswordModal);
+    document.getElementById('confirmPasswordBtn').addEventListener('click', verifyPassword);
+    document.getElementById('cancelPasswordBtn').addEventListener('click', closePasswordModal);
+    document.getElementById('saveEmailConfigBtn').addEventListener('click', saveEmailConfig);
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => setActiveTab(btn.getAttribute('data-tab')));
+    });
+
+    // Inicialización
+    loadFromLocalStorage();
+    checkTeacherMode();
+    setupLogo();
+    loadEmailConfig();
+    if (teacherMode) renderScoresTable();
+</script>
+</body>
+</html>
